@@ -18,6 +18,18 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pushButton_7, SIGNAL(clicked()), this, SLOT(on_pushButton_DIGIT_clicked()));
     connect(ui->pushButton_8, SIGNAL(clicked()), this, SLOT(on_pushButton_DIGIT_clicked()));
     connect(ui->pushButton_9, SIGNAL(clicked()), this, SLOT(on_pushButton_DIGIT_clicked()));
+
+
+    QFont fnt  = ui->resultLabel->font();
+    fnt.setPixelSize(55);
+    ui->resultLabel->setFont(fnt);
+
+    this->setWindowIcon(QIcon(":/new/images/icon.png"));
+
+    has_dot = false;
+    ui->resultLabel->setText("0");
+    op = false;
+
 }
 
 MainWindow::~MainWindow()
@@ -61,36 +73,53 @@ void MainWindow::keyPressEvent(QKeyEvent* ke)
 /* calculator functions */
 void MainWindow::click_DIGIT(int digit)
 {
+    QString text = ui->resultLabel->text();
+
     if (clear)
     {
-        ui->resultLabel->setText(QString::number(digit));
+        text = QString::number(digit);
         clear = false;
     }
     else if (ui->resultLabel->text().size() < 10)
     {
-        QString text = ui->resultLabel->text();
         if (text == "0")
         {
             text = QString::number(digit);
         }
         else
         {
-            text += QString::number(digit);
+            text = ui->resultLabel->text() + QString::number(digit);
         }
-        ui->resultLabel->setText(text);
 
     }
+    ui->resultLabel->setText(text);
+
+    QFont fnt  = ui->resultLabel->font();
+
+    if (text.length() > 10) fnt.setPixelSize(27);
+    else if (text.length() > 5) fnt.setPixelSize(40);
+    else fnt.setPixelSize(55);
+
+    ui->resultLabel->setFont(fnt);
 }
 void MainWindow::click_AC()
 {
     has_dot = 0;
     ui->resultLabel->setText("0");
     op = false;
+
+    QFont fnt  = ui->resultLabel->font();
+    fnt.setPixelSize(55);
+    ui->resultLabel->setFont(fnt);
 }
 void MainWindow::click_C()
 {
     has_dot = 0;
     ui->resultLabel->setText("0");
+
+    QFont fnt  = ui->resultLabel->font();
+    fnt.setPixelSize(55);
+    ui->resultLabel->setFont(fnt);
 }
 void MainWindow::click_DOT()
 {
@@ -108,9 +137,10 @@ void MainWindow::click_DOT()
 }
 void MainWindow::click_REV()
 {
-    double number = ui->resultLabel->text().toDouble();
-    number *= -1;
-    ui->resultLabel->setText(QString::number(number));
+    QString text = ui->resultLabel->text();
+    if (text[0] == '-') text.erase(text.begin(), text.begin() + 1);
+    else text.push_front('-');
+    ui->resultLabel->setText(text);
 }
 void MainWindow::click_OPERATION(char operation)
 {
@@ -145,7 +175,16 @@ void MainWindow::click_RES()
         break;
         }
 
-        ui->resultLabel->setText(QString::number(value_res, 'g', 10));
+        QString text = QString::number(value_res, 'g', 10);
+        ui->resultLabel->setText(text);
+
+        QFont fnt  = ui->resultLabel->font();
+        if (text.length() > 10) fnt.setPixelSize(27);
+        else if (text.length() > 5) fnt.setPixelSize(40);
+        else fnt.setPixelSize(55);
+
+        ui->resultLabel->setFont(fnt);
+
         clear = true;
         has_dot = 0;
         value_1 = value_res;
