@@ -70,7 +70,6 @@ void MainWindow::keyPressEvent(QKeyEvent* ke)
 
         case Qt::Key_Escape:    this->close();
     }
-    qDebug() << ke->key();
 }
 
 void MainWindow::on_pushButton_AC_clicked()
