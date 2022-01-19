@@ -9,9 +9,17 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+/*
+MainWindow обеспечивает основу для создания пользовательского интерфейса приложения (user interface)
+Qt имеет QMainWindow и связанные с ним классы для управления главным окном
+QMainWindow имеет собственный макет
+*/
 class MainWindow : public QMainWindow
 {
-    // Q_OBJECT macro must appear in the private section of a class definition that declares its own signals and slots or that uses other services provided by Qt meta-object system
+    /*
+    все классы, унаследованные от QObject, могут содержать сигналы и слоты
+    макрос Q_OBJECT должен отображаться в private секции класса, который объявляет свои собственные сигналы и слоты или другие сервисы, предоставляемые системой метаобъектов Qt (Qt meta-object system)
+    */
     Q_OBJECT
 
 protected:
@@ -22,29 +30,22 @@ public:
     ~MainWindow();
 
 private:
+
     Ui::MainWindow *ui;
 
-    void click_DIGIT(int);
-
-    void click_AC();
-    void click_C();
-
-    void click_DOT();
-    void click_REV();
-
-    void click_OPERATION(char);
-
-    void click_RES();
-
-
-    double value_1;
+    double value_1 = 0;
     int has_dot = false;
     char op = 0;
     bool clear = true;
+    QFont labelFont;
 
+/*
+механизм сигналов и слотов является центральной особенностью Qt, они используются для связи между объектами
+сигнал испускается, когда происходит определенное событие
+слот – это функция, которая вызывается в ответ на определенный сигнал
+*/
 private slots:
     void on_pushButton_DIGIT_clicked();
-
     void on_pushButton_AC_clicked();
     void on_pushButton_C_clicked();
     void on_pushButton_DOT_clicked();

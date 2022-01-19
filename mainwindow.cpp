@@ -5,9 +5,17 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    /*
+    создает фактические экземпляры виджетов
+    форма, которую мы создаем в QtDesigner, сохраняется как XML файл
+    */
     ui->setupUi(this);
 
-    // creates a connection of the given type from the signal in the sender object to the method in the receiver object
+    this->setWindowIcon(QIcon(":/new/images/icon.png"));
+
+    /*
+    connect() создает заданное соединение из сигнала в объекте отправителя и методе слота в объекте получателя
+    */
     connect(ui->pushButton_0, SIGNAL(clicked()), this, SLOT(on_pushButton_DIGIT_clicked()));
     connect(ui->pushButton_1, SIGNAL(clicked()), this, SLOT(on_pushButton_DIGIT_clicked()));
     connect(ui->pushButton_2, SIGNAL(clicked()), this, SLOT(on_pushButton_DIGIT_clicked()));
@@ -19,17 +27,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pushButton_8, SIGNAL(clicked()), this, SLOT(on_pushButton_DIGIT_clicked()));
     connect(ui->pushButton_9, SIGNAL(clicked()), this, SLOT(on_pushButton_DIGIT_clicked()));
 
-
-    QFont fnt  = ui->resultLabel->font();
-    fnt.setPixelSize(55);
-    ui->resultLabel->setFont(fnt);
-
-    this->setWindowIcon(QIcon(":/new/images/icon.png"));
-
-    has_dot = false;
+    labelFont = ui->resultLabel->font();
+    labelFont.setPixelSize(55);
+    ui->resultLabel->setFont(labelFont);
     ui->resultLabel->setText("0");
-    op = false;
-
 }
 
 MainWindow::~MainWindow()
@@ -37,42 +38,155 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-/* key Press Event */
+// событие нажатия клавиши
 void MainWindow::keyPressEvent(QKeyEvent* ke)
 {
     switch(ke->key())
     {
-        case Qt::Key_0:         click_DIGIT(0); break;
-        case Qt::Key_1:         click_DIGIT(1); break;
-        case Qt::Key_2:         click_DIGIT(2); break;
-        case Qt::Key_3:         click_DIGIT(3); break;
-        case Qt::Key_4:         click_DIGIT(4); break;
-        case Qt::Key_5:         click_DIGIT(5); break;
-        case Qt::Key_6:         click_DIGIT(6); break;
-        case Qt::Key_7:         click_DIGIT(7); break;
-        case Qt::Key_8:         click_DIGIT(8); break;
-        case Qt::Key_9:         click_DIGIT(9); break;
+        case Qt::Key_0:         ui->pushButton_0->animateClick(); break;
+        case Qt::Key_1:         ui->pushButton_1->animateClick(); break;
+        case Qt::Key_2:         ui->pushButton_2->animateClick(); break;
+        case Qt::Key_3:         ui->pushButton_3->animateClick(); break;
+        case Qt::Key_4:         ui->pushButton_4->animateClick(); break;
+        case Qt::Key_5:         ui->pushButton_5->animateClick(); break;
+        case Qt::Key_6:         ui->pushButton_6->animateClick(); break;
+        case Qt::Key_7:         ui->pushButton_7->animateClick(); break;
+        case Qt::Key_8:         ui->pushButton_8->animateClick(); break;
+        case Qt::Key_9:         ui->pushButton_9->animateClick(); break;
 
-        case Qt::Key_Delete:    click_AC(); break;
-        case Qt::Key_Backspace: click_C(); break;
+        case Qt::Key_Delete:    ui->pushButton_AC->animateClick(); break;
+        case Qt::Key_Backspace: ui->pushButton_C->animateClick(); break;
 
-        case Qt::Key_Period:    click_DOT(); break;
-        case Qt::Key_Shift:     click_REV(); break;
+        case Qt::Key_Period:    ui->pushButton_DOT->animateClick(); break;
+        case Qt::Key_Comma:     ui->pushButton_DOT->animateClick(); break;
+        case Qt::Key_Shift:     ui->pushButton_REV->animateClick(); break;
 
-        case Qt::Key_Plus:      click_OPERATION('+'); break;
-        case Qt::Key_Minus:     click_OPERATION('-'); break;
-        case Qt::Key_Asterisk:  click_OPERATION('*'); break;
-        case Qt::Key_Slash:     click_OPERATION('/'); break;
+        case Qt::Key_Plus:      ui->pushButton_ADD->animateClick(); break;
+        case Qt::Key_Minus:     ui->pushButton_SUB->animateClick(); break;
+        case Qt::Key_Asterisk:  ui->pushButton_MUL->animateClick(); break;
+        case Qt::Key_Slash:     ui->pushButton_DIV->animateClick(); break;
 
-        case Qt::Key_Enter:     click_RES(); break;
+        case Qt::Key_Enter:     ui->pushButton_RES->animateClick(); break;
 
         case Qt::Key_Escape:    this->close();
     }
+    qDebug() << ke->key();
 }
 
-/* calculator functions */
-void MainWindow::click_DIGIT(int digit)
+void MainWindow::on_pushButton_AC_clicked()
 {
+    has_dot = false;
+    clear = false;
+    ui->resultLabel->setText("0");
+    op = 0;
+
+    labelFont.setPixelSize(55);
+    ui->resultLabel->setFont(labelFont);
+}
+
+void MainWindow::on_pushButton_C_clicked()
+{
+    has_dot = false;
+    ui->resultLabel->setText("0");
+
+    labelFont.setPixelSize(55);
+    ui->resultLabel->setFont(labelFont);
+}
+
+void MainWindow::on_pushButton_DOT_clicked()
+{
+    if (clear)
+    {
+        ui->resultLabel->setText("0.");
+        has_dot = true;
+        clear = false;
+
+        labelFont.setPixelSize(55);
+        ui->resultLabel->setFont(labelFont);
+    }
+    else if (!has_dot)
+    {
+         ui->resultLabel->setText(ui->resultLabel->text() + ".");
+         has_dot = true;
+    }
+}
+
+void MainWindow::on_pushButton_REV_clicked()
+{
+    QString text = ui->resultLabel->text();
+    if (text[0] == '-') text.erase(text.begin(), text.begin() + 1);
+    else text.push_front('-');
+    ui->resultLabel->setText(text);
+}
+
+void MainWindow::on_pushButton_ADD_clicked()
+{
+    op = '+';
+    has_dot = false;
+    clear = true;
+    value_1 = ui->resultLabel->text().toDouble();
+}
+
+void MainWindow::on_pushButton_SUB_clicked()
+{
+    op = '-';
+    has_dot = false;
+    clear = true;
+    value_1 = ui->resultLabel->text().toDouble();
+}
+
+void MainWindow::on_pushButton_MUL_clicked()
+{
+    op = '*';
+    has_dot = false;
+    clear = true;
+    value_1 = ui->resultLabel->text().toDouble();
+}
+
+void MainWindow::on_pushButton_DIV_clicked()
+{
+    op = '/';
+    has_dot = false;
+    clear = true;
+    value_1 = ui->resultLabel->text().toDouble();
+}
+
+void MainWindow::on_pushButton_RES_clicked()
+{
+    if (op)
+    {
+        double value_2 = ui->resultLabel->text().toDouble();
+        double value_res = value_1;
+
+        switch(op)
+        {
+        case '+': value_res += value_2; break;
+        case '-': value_res -= value_2; break;
+        case '*': value_res *= value_2; break;
+        case '/': value_res /= value_2; break;
+        }
+
+        QString text = QString::number(value_res, 'g', 10);
+        ui->resultLabel->setText(text);
+
+        if (text.length() > 10) labelFont.setPixelSize(27);
+        else if (text.length() > 5) labelFont.setPixelSize(40);
+        else labelFont.setPixelSize(55);
+        ui->resultLabel->setFont(labelFont);
+
+        clear = true;
+        has_dot = false;
+        value_1 = value_res;
+        op = 0;
+    }
+}
+
+void MainWindow::on_pushButton_DIGIT_clicked()
+{
+    // sender() возвращает указатель на объект, отправивший сигнал
+    QPushButton *pb = (QPushButton*)sender();
+
+    int digit = pb->text().toInt();
     QString text = ui->resultLabel->text();
 
     if (clear)
@@ -94,120 +208,9 @@ void MainWindow::click_DIGIT(int digit)
     }
     ui->resultLabel->setText(text);
 
-    QFont fnt  = ui->resultLabel->font();
-
-    if (text.length() > 10) fnt.setPixelSize(27);
-    else if (text.length() > 5) fnt.setPixelSize(40);
-    else fnt.setPixelSize(55);
-
-    ui->resultLabel->setFont(fnt);
+    labelFont = ui->resultLabel->font();
+    if (text.length() > 10) labelFont.setPixelSize(27);
+    else if (text.length() > 5) labelFont.setPixelSize(40);
+    else labelFont.setPixelSize(55);
+    ui->resultLabel->setFont(labelFont);
 }
-void MainWindow::click_AC()
-{
-    has_dot = 0;
-    ui->resultLabel->setText("0");
-    op = false;
-
-    QFont fnt  = ui->resultLabel->font();
-    fnt.setPixelSize(55);
-    ui->resultLabel->setFont(fnt);
-}
-void MainWindow::click_C()
-{
-    has_dot = 0;
-    ui->resultLabel->setText("0");
-
-    QFont fnt  = ui->resultLabel->font();
-    fnt.setPixelSize(55);
-    ui->resultLabel->setFont(fnt);
-}
-void MainWindow::click_DOT()
-{
-    if (clear)
-    {
-        ui->resultLabel->setText("0.");
-        has_dot = 1;
-        clear = false;
-    }
-    else if (has_dot == 0)
-    {
-         ui->resultLabel->setText(ui->resultLabel->text() + ".");
-         has_dot = 1;
-    }
-}
-void MainWindow::click_REV()
-{
-    QString text = ui->resultLabel->text();
-    if (text[0] == '-') text.erase(text.begin(), text.begin() + 1);
-    else text.push_front('-');
-    ui->resultLabel->setText(text);
-}
-void MainWindow::click_OPERATION(char operation)
-{
-    op = operation;
-    has_dot = false;
-    clear = true;
-    value_1 = ui->resultLabel->text().toDouble();
-}
-void MainWindow::click_RES()
-{
-    if (op)
-    {
-        double value_2 = ui->resultLabel->text().toDouble();
-        double value_res = 0;
-
-        switch(op)
-        {
-        case '+':
-            value_res = value_1 + value_2;
-        break;
-
-        case '-':
-            value_res = value_1 - value_2;
-        break;
-
-        case '*':
-            value_res = value_1 * value_2;
-        break;
-
-        case '/':
-            value_res = value_1 / value_2;
-        break;
-        }
-
-        QString text = QString::number(value_res, 'g', 10);
-        ui->resultLabel->setText(text);
-
-        QFont fnt  = ui->resultLabel->font();
-        if (text.length() > 10) fnt.setPixelSize(27);
-        else if (text.length() > 5) fnt.setPixelSize(40);
-        else fnt.setPixelSize(55);
-
-        ui->resultLabel->setFont(fnt);
-
-        clear = true;
-        has_dot = 0;
-        value_1 = value_res;
-
-        op = 0;
-    }
-}
-
-
-/* push Button events */
-void MainWindow::on_pushButton_DIGIT_clicked()
-{
-    // returns a pointer to the object that sent the signal
-    QPushButton *pb = (QPushButton*)sender();
-    click_DIGIT(pb->text().toInt());
-}
-void MainWindow::on_pushButton_AC_clicked() { click_AC(); }
-void MainWindow::on_pushButton_C_clicked() { click_C(); }
-void MainWindow::on_pushButton_DOT_clicked() { click_DOT(); }
-void MainWindow::on_pushButton_REV_clicked() { click_REV(); }
-void MainWindow::on_pushButton_ADD_clicked() { click_OPERATION('+'); }
-void MainWindow::on_pushButton_SUB_clicked() { click_OPERATION('-'); }
-void MainWindow::on_pushButton_MUL_clicked() { click_OPERATION('*'); }
-void MainWindow::on_pushButton_DIV_clicked() { click_OPERATION('/'); }
-void MainWindow::on_pushButton_RES_clicked() { click_RES(); }
-
